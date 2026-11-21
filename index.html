@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>C4S A4 Badge Sheet Print Layout</title>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .brand-logo-only {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .upload-zone {
+            width: 100%;
+            border: 2px dashed #94a3b8;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #FDF9EE !important;
+            color: #1a1a1a !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .upload-zone:hover {
+            border-color: #00c853;
+        }
+
+        .toolbar {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            padding: 10px 16px;
+            background-color: #f8fafc !important;
+            color: #1a1a1a !important;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* A4 Aspect Ratio Preview (210 : 297) */
+        .a4-preview-wrapper {
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 210 / 297;
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+            padding: 6% 12.5%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            column-gap: 28%;
+            row-gap: 4.5%;
+            align-items: center;
+            justify-items: center;
+        }
+
+        /* Subtle UI-only slot indicator (invisible on exported print sheet) */
+        .badge-slot {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            border: 1.5px dashed #cbd5e1;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .badge-slot.filled {
+            border: none;
+            background-color: #ffffff;
+        }
+
+        .badge-slot span {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .badge-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .btn-download {
+            width: 100%;
+            padding: 14px;
+            background-color: #00c853 !important;
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-download:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background-color: #cbd5e1 !important;
+            color: #64748b !important;
+            box-shadow: none;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #64748b !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        footer span.brand-text {
+            color: #ef4444 !important;
+            font-weight: 600;
+        }
+
+        .help-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b !important;
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border: 1px solid #94a3b8;
+            border-radius: 20px;
+            background-color: #f8fafc !important;
+        }
+
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img class="brand-logo-only" src="Logo.png" alt="Amy's World Badge Printer">
+    </header>
+
+    <main class="container">
+        <div class="upload-zone" onclick="document.getElementById('multi-file-input').click()">
+            <p>🖨️ <strong>Tap to add 57mm badges (up to 8 per A4 sheet)</strong></p>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">300 DPI A4 Print Layout • Extra Spacing & Invisible Borders</p>
+            <input type="file" id="multi-file-input" accept="image/*" multiple style="display: none;">
+        </div>
+
+        <div class="toolbar">
+            <button class="btn-secondary" id="btn-fill-all" disabled>Duplicate 1st Badge to All 8</button>
+            <button class="btn-secondary" id="btn-clear-all" disabled>Clear Sheet</button>
+        </div>
+
+        <p style="font-size: 0.75rem; color: #64748b;">Tap any slot to add, replace, or remove a badge</p>
+
+        <div class="a4-preview-wrapper" id="a4-grid">
+            <!-- 8 Slots Generated by JS -->
+        </div>
+
+        <button class="btn-download" id="btn-download" disabled>
+            Download A4 Print Sheet (300 DPI)
+        </button>
+    </main>
+
+    <footer>
+        <p>© 2026 <span class="brand-text">C4S.ai</span>. All Rights Reserved.</p>
+        <p style="font-size: 0.7rem;">Licensed for Amy's World</p>
+        <a href="https://wa.me/96560908108" target="_blank" class="help-link">
+            💬 HELP
+        </a>
+    </footer>
+
+    <input type="file" id="single-slot-input" accept="image/*" style="display: none;">
+    <!-- Exact 300 DPI A4 Dimensions: 210mm x 297mm = 2480 x 3508 px -->
+    <canvas id="a4-canvas" width="2480" height="3508"></canvas>
+
+    <script>
+        const TOTAL_SLOTS = 8;
+        const slotsData = new Array(TOTAL_SLOTS).fill(null);
+        let activeSlotIndex = null;
+
+        const a4Grid = document.getElementById('a4-grid');
+        const multiFileInput = document.getElementById('multi-file-input');
+        const singleSlotInput = document.getElementById('single-slot-input');
+        const btnFillAll = document.getElementById('btn-fill-all');
+        const btnClearAll = document.getElementById('btn-clear-all');
+        const btnDownload = document.getElementById('btn-download');
+        const canvas = document.getElementById('a4-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function renderGrid() {
+            a4Grid.innerHTML = '';
+            let filledCount = 0;
+
+            slotsData.forEach((imgSrc, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'badge-slot' + (imgSrc ? ' filled' : '');
+
+                if (imgSrc) {
+                    filledCount++;
+                    const img = document.createElement('img');
+                    img.src = imgSrc;
+                    slot.appendChild(img);
+                } else {
+                    const label = document.createElement('span');
+                    label.textContent = `+ ${index + 1}`;
+                    slot.appendChild(label);
+                }
+
+                slot.addEventListener('click', () => {
+                    if (slotsData[index]) {
+                        // Tap filled slot to clear it
+                        slotsData[index] = null;
+                        renderGrid();
+                    } else {
+                        // Tap empty slot to pick an image for that slot
+                        activeSlotIndex = index;
+                        singleSlotInput.click();
+                    }
+                });
+
+                a4Grid.appendChild(slot);
+            });
+
+            btnDownload.disabled = filledCount === 0;
+            btnClearAll.disabled = filledCount === 0;
+            btnFillAll.disabled = !slotsData[0];
+        }
+
+        // Batch upload up to 8 images into open slots
+        multiFileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            let fileIdx = 0;
+            for (let i = 0; i < TOTAL_SLOTS && fileIdx < files.length; i++) {
+                if (!slotsData[i]) {
+                    const currentSlot = i;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        slotsData[currentSlot] = event.target.result;
+                        renderGrid();
+                    };
+                    reader.readAsDataURL(files[fileIdx]);
+                    fileIdx++;
+                }
+            }
+            multiFileInput.value = '';
+        });
+
+        // Single slot upload
+        singleSlotInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && activeSlotIndex !== null) {
+                const targetSlot = activeSlotIndex;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    slotsData[targetSlot] = event.target.result;
+                    renderGrid();
+                };
+                reader.readAsDataURL(file);
+            }
+            singleSlotInput.value = '';
+        });
+
+        // Duplicate 1st badge across all 8 slots
+        btnFillAll.addEventListener('click', () => {
+            if (!slotsData[0]) return;
+            for (let i = 1; i < TOTAL_SLOTS; i++) {
+                slotsData[i] = slotsData[0];
+            }
+            renderGrid();
+        });
+
+        // Clear all slots
+        btnClearAll.addEventListener('click', () => {
+            slotsData.fill(null);
+            renderGrid();
+        });
+
+        // Render & Download Full 300 DPI A4 Sheet (Invisible Borders)
+        btnDownload.addEventListener('click', async () => {
+            const A4_W = 2480;
+            const A4_H = 3508;
+            const BADGE_SIZE = 673; // Exact 57mm at 300 DPI
+
+            // Generous Margins & Spacing for 2x4 Grid
+            const MARGIN_X = 310;  // ~26.2mm left & right margin
+            const GAP_X = 514;     // ~43.5mm horizontal spacing
+            const MARGIN_Y = 210;  // ~17.8mm top & bottom margin
+            const GAP_Y = 132;     // ~11.2mm vertical spacing
+
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, A4_W, A4_H);
+
+            const loadPromises = slotsData.map((src, index) => {
+                if (!src) return Promise.resolve();
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const col = index % 2;
+                        const row = Math.floor(index / 2);
+
+                        const x = MARGIN_X + col * (BADGE_SIZE + GAP_X);
+                        const y = MARGIN_Y + row * (BADGE_SIZE + GAP_Y);
+                        const centerX = x + BADGE_SIZE / 2;
+                        const centerY = y + BADGE_SIZE / 2;
+                        const radius = BADGE_SIZE / 2;
+
+                        // Clip cleanly to 57mm circle with zero visible border
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.clip();
+
+                        ctx.drawImage(img, x, y, BADGE_SIZE, BADGE_SIZE);
+                        ctx.restore();
+                        resolve();
+                    };
+                    img.src = src;
+                });
+            });
+
+            await Promise.all(loadPromises);
+            ctx.restore();
+
+            const link = document.createElement('a');
+            link.download = `C4S-A4-8x57mm-Badges-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        });
+
+        renderGrid();
+    </script>
+</body>
+</html>
